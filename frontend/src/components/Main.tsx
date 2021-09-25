@@ -16,9 +16,11 @@ import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import FolderIcon from "@material-ui/icons/Folder";
 import HomeIcon from "@material-ui/icons/Home";
 import MenuIcon from "@material-ui/icons/Menu";
+import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import clsx from "clsx";
 import React from "react";
 import { Link, Route, Switch } from "react-router-dom";
+import { useAPI, withAPI, WithAPIProps } from "../api";
 import theme from "../theme";
 import FileList from "./FileList";
 import PrintStatus from "./PrintStatus";
@@ -104,6 +106,7 @@ function Main({ width }: WithWidth): React.ReactElement {
   const handleDrawerClose = () => {
     setOpen(false);
   };
+  const api = useAPI();
   const isSmallScreen = /xs|sm/.test(width);
   const drawerVariant = isSmallScreen ? "temporary" : "permanent";
   const handleDrawerItemClick = () => {
@@ -183,6 +186,19 @@ function Main({ width }: WithWidth): React.ReactElement {
                 <FolderIcon />
               </ListItemIcon>
               <ListItemText primary="Files" />
+            </ListItem>
+            <ListItem
+              button
+              key="power"
+              onClick={async () => {
+              await api.togglePower();
+              await this._refresh();
+            }}
+            >
+              <ListItemIcon>
+                <PowerSettingsNewIcon />
+              </ListItemIcon>
+              <ListItemText primary="Power" />
             </ListItem>
           </List>
         </SwipeableDrawer>

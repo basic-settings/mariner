@@ -83,3 +83,44 @@ def get_cache_directory() -> str:
     if not isinstance(cache_config, dict):
         return default_directory
     return str(cache_config.get("directory", default_directory))
+
+
+def get_ha_srv() -> Optional[str]:
+    ha_config = _get_config().get("homeassistant")
+    if not isinstance(ha_config, dict):
+        return None
+    ha_srv = printer_config.get("address")
+    if ha_srv is None:
+        return None
+    return str(ha_srv)
+
+
+def get_ha_usr() -> Optional[str]:
+    ha_config = _get_config().get("homeassistant")
+    if not isinstance(ha_config, dict):
+        return None
+    ha_usr = printer_config.get("user")
+    if ha_usr is None:
+        return None
+    return str(ha_usr)
+
+
+def get_ha_pass() -> Optional[str]:
+    ha_config = _get_config().get("homeassistant")
+    if not isinstance(ha_config, dict):
+        return None
+    ha_pass = printer_config.get("password")
+    if ha_pass is None:
+        return None
+    return str(ha_pass)
+
+
+def get_ha_topic() -> Optional[str]:
+    ha_config = _get_config().get("homeassistant")
+    if not isinstance(ha_config, dict):
+        return None
+    ha_topic = printer_config.get("topic")
+    if ha_topic is None:
+        return None
+    return str(ha_topic)
+

@@ -9,9 +9,12 @@ import serial
 
 from mariner import config
 from mariner.exceptions import UnexpectedPrinterResponse
+from mariner.mqtt_client import MqttClient
 
 
 class PrinterState(Enum):
+    ON = "ON"
+    OFF = "OFF"
     IDLE = "IDLE"
     STARTING_PRINT = "STARTING_PRINT"
     PRINTING = "PRINTING"
@@ -31,8 +34,13 @@ class ChiTuPrinter:
     def __init__(self) -> None:
         self._serial_port = serial.Serial(
             baudrate=config.get_printer_baudrate(),
+
             timeout=0.1,
         )
+        # pigpiod connection
+        factory = PiGPIOFactory(host='localhost')
+        #device = OutputDevice(17, initial_value=None, active_high=False, pin_factory=factory)
+        self.device = OutputDevice(17, initial_value=0, active_high=False, pin_factory=factory)
 
     def _extract_response_with_regex(self, regex: str, data: str) -> Match[str]:
         match = re.search(regex, data)
@@ -42,7 +50,13 @@ class ChiTuPrinter:
 
     def open(self) -> None:
         self._serial_port.port = config.get_printer_serial_port()
-        self._serial_port.open()
+        try:
+            self._serial_port.open()
+        #except FileNotFoundError:
+        except:
+            # TODO: Fixme
+            # do nothing here for the moment
+            pass
 
     def close(self) -> None:
         self._serial_port.close()
@@ -70,6 +84,7 @@ class ChiTuPrinter:
         return self._send_and_read(b"M4000")
 
     def get_print_status(self) -> PrintStatus:
+        # TODO: Return OFF else continue
         data = self._send_and_read(b"M4000")
         match = self._extract_response_with_regex("D:([0-9]+)/([0-9]+)/([0-9]+)", data)
 
@@ -162,6 +177,9 @@ class ChiTuPrinter:
 
     def reboot(self, delay_in_ms: int = 0) -> None:
         self._send((f"M6040 I{delay_in_ms}").encode())
+
+    def toggle_power(self) -> None:
+        self.device.toggle()
 
     def _send_and_read(self, data: bytes, timeout_secs: Optional[float] = None) -> str:
         self._serial_port.reset_input_buffer()

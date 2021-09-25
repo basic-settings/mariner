@@ -173,6 +173,17 @@ export class API {
     }
   }
 
+  async togglePower(): Promise<CommandAPIResponse | undefined> {
+    try {
+      const response: AxiosResponse<CommandAPIResponse> = await axios.post(
+        "api/printer/command/power"
+      );
+      return response.data;
+    } catch (error) {
+      this._handleError(error);
+    }
+  }
+
   async _handleError(error: Error): Promise<void> {
     if (!this._alertFn) {
       throw error;

@@ -62,6 +62,8 @@ def print_status() -> str:
             num_retries=3,
         )
 
+        # TODO: Add check if printer off -> return nothing
+
         if print_status.state == PrinterState.IDLE:
             progress = 0.0
             print_details = {}
@@ -237,6 +239,7 @@ class PrinterCommand(Enum):
     RESUME_PRINT = "resume_print"
     CANCEL_PRINT = "cancel_print"
     REBOOT = "reboot"
+    POWER = "power"
 
 
 @api.route("/printer/command/<command>", methods=["POST"])
@@ -255,4 +258,6 @@ def printer_command(command: str) -> str:
             printer.stop_printing()
         elif printer_command == PrinterCommand.REBOOT:
             printer.reboot()
+        elif printer_command == PrinterCommand.POWER:
+            ret = printer.toggle_power()
         return jsonify({"success": True})

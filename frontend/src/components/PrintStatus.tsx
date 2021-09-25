@@ -42,10 +42,11 @@ const styles = () =>
     },
   });
 
-type PrinterState = "IDLE" | "STARTING_PRINT" | "PRINTING" | "PAUSED";
+type PrinterState = "ON" | "OFF" | "IDLE" | "STARTING_PRINT" | "PRINTING" | "PAUSED";
 
 function toPrinterState(state: string): PrinterState {
   if (
+    state !== "OFF" &&
     state !== "IDLE" &&
     state !== "STARTING_PRINT" &&
     state !== "PRINTING" &&
