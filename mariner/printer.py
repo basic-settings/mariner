@@ -9,7 +9,8 @@ import serial
 
 from mariner import config
 from mariner.exceptions import UnexpectedPrinterResponse
-from mariner.mqtt_client import MqttClient
+# TODO: FixMe, enable once MqttClient is ready and tested
+#from mariner.mqtt_client import MqttClient
 
 
 class PrinterState(Enum):
