@@ -26,6 +26,12 @@ files_directory = "/mnt/usb_share"
 serial_port = "/dev/serial0"
 baudrate = 115200
 
+# Pin used for triggering the relay that turns the printer ON/OFF.
+relay_pin = 17
+initial_value=""
+active_high=False
+
+
 [http]
 # Hostname or IP address (string) on which to listen. Default is 0.0.0.0, which
 # means "all IP addresses on this host". Note that listening on 0.0.0.0 assumes

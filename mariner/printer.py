@@ -1,5 +1,7 @@
 import os
 import re
+from gpiozero import OutputDevice
+from gpiozero.pins.pigpio import PiGPIOFactory
 from dataclasses import dataclass
 from enum import Enum
 from types import TracebackType
@@ -9,8 +11,6 @@ import serial
 
 from mariner import config
 from mariner.exceptions import UnexpectedPrinterResponse
-# TODO: FixMe, enable once MqttClient is ready and tested
-#from mariner.mqtt_client import MqttClient
 
 
 class PrinterState(Enum):
@@ -29,19 +29,22 @@ class PrintStatus:
     total_bytes: Optional[int] = None
 
 
+# pigpiod connection and relay board connection
+FACTORY = PiGPIOFactory(host='localhost')
+# TODO: config.get_relay_board_port()
+# TODO: config.get_relay_board_config() -> pin, init_val, active_high
+DEVICE = OutputDevice(17, initial_value=0, active_high=False, pin_factory=FACTORY)
+
+
 class ChiTuPrinter:
     _serial_port: serial.Serial
 
     def __init__(self) -> None:
         self._serial_port = serial.Serial(
             baudrate=config.get_printer_baudrate(),
-
             timeout=0.1,
         )
-        # pigpiod connection
-        factory = PiGPIOFactory(host='localhost')
-        #device = OutputDevice(17, initial_value=None, active_high=False, pin_factory=factory)
-        self.device = OutputDevice(17, initial_value=0, active_high=False, pin_factory=factory)
+        self.device = DEVICE
 
     def _extract_response_with_regex(self, regex: str, data: str) -> Match[str]:
         match = re.search(regex, data)
@@ -54,9 +57,11 @@ class ChiTuPrinter:
         try:
             self._serial_port.open()
         #except FileNotFoundError:
+        # TODO: FixMe, this is actually serial.serial exception
         except:
-            # TODO: Fixme
-            # do nothing here for the moment
+            # do nothing here for the moment, device is not powered
+            # on, it makes no sense to raise further Exceptions but
+            # return a valid status instead, i.e. PrinterState.OFF
             pass
 
     def close(self) -> None:
@@ -181,6 +186,7 @@ class ChiTuPrinter:
 
     def toggle_power(self) -> None:
         self.device.toggle()
+        return self.device.value
 
     def _send_and_read(self, data: bytes, timeout_secs: Optional[float] = None) -> str:
         self._serial_port.reset_input_buffer()
