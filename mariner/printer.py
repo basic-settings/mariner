@@ -30,10 +30,23 @@ class PrintStatus:
 
 
 # pigpiod connection and relay board connection
-FACTORY = PiGPIOFactory(host='localhost')
-# TODO: config.get_relay_board_port()
-# TODO: config.get_relay_board_config() -> pin, init_val, active_high
-DEVICE = OutputDevice(17, initial_value=0, active_high=False, pin_factory=FACTORY)
+FACTORY = None
+DEVICE = None
+
+
+GPIO = config.get_relay_pin()
+if GPIO:
+    # One could argue the gpio libs can be loaded now on-demand
+    # as the GPIO is configured, instead of always loading them.
+    # At the same time installations without relays would use
+    # more space for gpiozero and pigpio libraries.
+    # Extending with MQTT support will also bring in `paho`,
+    # which means more memory space and disk space use
+    init_val = config.get_relay_initial_value()
+    active_high = config.get_relay_active_high()
+    FACTORY = PiGPIOFactory(host='localhost')
+    DEVICE = OutputDevice(GPIO, initial_value=init_val,
+            active_high=active_high, pin_factory=FACTORY)
 
 
 class ChiTuPrinter:
@@ -60,7 +73,7 @@ class ChiTuPrinter:
         # TODO: FixMe, this is actually serial.serial exception
         except:
             # do nothing here for the moment, device is not powered
-            # on, it makes no sense to raise further Exceptions but
+            # on, it makes no sense to raise further exceptions but
             # return a valid status instead, i.e. PrinterState.OFF
             pass
 
@@ -90,7 +103,8 @@ class ChiTuPrinter:
         return self._send_and_read(b"M4000")
 
     def get_print_status(self) -> PrintStatus:
-        # TODO: Return OFF else continue
+        # TODO: FixMe: This should return OFF else continue
+        # instead of just continuing
         data = self._send_and_read(b"M4000")
         match = self._extract_response_with_regex("D:([0-9]+)/([0-9]+)/([0-9]+)", data)
 
@@ -184,7 +198,9 @@ class ChiTuPrinter:
     def reboot(self, delay_in_ms: int = 0) -> None:
         self._send((f"M6040 I{delay_in_ms}").encode())
 
-    def toggle_power(self) -> None:
+    def toggle_power(self) -> Optional[int]:
+        if not self.device:
+            return None
         self.device.toggle()
         return self.device.value
 

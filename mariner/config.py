@@ -61,6 +61,27 @@ def get_printer_baudrate() -> int:
     return int(printer_config.get("baudrate", default_baudrate))
 
 
+def get_relay_pin() -> Optional[int]:
+    printer_config = _get_config().get("relay_board")
+    if not isinstance(printer_config, dict):
+        return None
+    return int(printer_config.get("relay_pin", None))
+
+
+def get_relay_initial_value() -> Optional[int]:
+    printer_config = _get_config().get("relay_board")
+    if not isinstance(printer_config, dict):
+        return None
+    return int(printer_config.get("initial_value", None))
+
+
+def get_relay_active_high() -> Optional[bool]:
+    printer_config = _get_config().get("relay_board")
+    if not isinstance(printer_config, dict):
+        return None
+    return bool(printer_config.get("active_high", None))
+
+
 def get_http_host() -> str:
     default_host = "0.0.0.0"
     http_config = _get_config().get("http")

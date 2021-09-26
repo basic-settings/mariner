@@ -51,6 +51,8 @@ def print_status() -> str:
         # sometimes we get an unexpected response from the printer (an "ok" instead of
         # the print status we expected). due to this, we retry at most 3 times here
         # until we have a successful response. see issue #180
+
+        # TODO: FixMe -> get status, if status -> OFF don't continue
         selected_file = retry(
             printer.get_selected_file,
             UnexpectedPrinterResponse,
@@ -61,8 +63,6 @@ def print_status() -> str:
             UnexpectedPrinterResponse,
             num_retries=3,
         )
-
-        # TODO: Add check if printer off -> return nothing
 
         if print_status.state == PrinterState.IDLE:
             progress = 0.0
@@ -259,5 +259,5 @@ def printer_command(command: str) -> str:
         elif printer_command == PrinterCommand.REBOOT:
             printer.reboot()
         elif printer_command == PrinterCommand.POWER:
-            ret = printer.toggle_power()
+            printer.toggle_power()
         return jsonify({"success": True})

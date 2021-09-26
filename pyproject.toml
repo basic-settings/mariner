@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mariner"
-version = "0.2.0"
+version = "0.2.0-2"
 description = "Web application for controlling MSLA 3D Printers based on ChiTu controllers"
 license = "MIT"
 readme = "README.rst"
@@ -15,6 +15,8 @@ mariner = 'mariner.server:main'
 flask = "2.0.1"
 flask-caching = "1.10.1"
 Flask-WTF = "0.15.1"
+gpiozero = "1.6.2"
+pigpio = "1.78"
 pypng = "0.0.20"
 pyre-extensions = "0.0.21"
 pyserial = "3.5"

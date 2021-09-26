@@ -13,6 +13,7 @@
 # directory that you are sharing to the printer through the USB Gadget
 files_directory = "/mnt/usb_share"
 
+
 [printer]
 # The name which will be displayed for the printer in the UI. By default no
 # printer name is displayed. Uncomment this line and set it to whatever you
@@ -26,10 +27,17 @@ files_directory = "/mnt/usb_share"
 serial_port = "/dev/serial0"
 baudrate = 115200
 
-# Pin used for triggering the relay that turns the printer ON/OFF.
+
+[relay_board]
+# Pin used for triggering the relay that turns the printer ON/OFF,
+# the documentation from `gpiozero` provides enough information
+# for all these 3 values.
 relay_pin = 17
-initial_value=""
-active_high=False
+
+# Initial value when the RPi starts, this should be tied to how the
+# relay is connected, as well as active_high setting.
+initial_value = 0
+active_high = false
 
 
 [http]
@@ -40,10 +48,12 @@ host = "0.0.0.0"
 # TCP port on which to listen
 port = 5000
 
+
 [cache]
 # Directory in which cached information such as file metadata and thumbnails
 # will be stored
 directory = "/tmp/mariner/"
+
 
 [homeassistant]
 # Configuration for HomeAssistant instance
