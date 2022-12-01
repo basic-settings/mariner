@@ -62,21 +62,21 @@ def get_printer_baudrate() -> int:
 
 
 def get_relay_pin() -> Optional[int]:
-    printer_config = _get_config().get("relay_board")
+    printer_config = _get_config().get("printer")
     if not isinstance(printer_config, dict):
         return None
     return int(printer_config.get("relay_pin", None))
 
 
 def get_relay_initial_value() -> Optional[int]:
-    printer_config = _get_config().get("relay_board")
+    printer_config = _get_config().get("printer")
     if not isinstance(printer_config, dict):
         return None
     return int(printer_config.get("initial_value", None))
 
 
 def get_relay_active_high() -> Optional[bool]:
-    printer_config = _get_config().get("relay_board")
+    printer_config = _get_config().get("printer")
     if not isinstance(printer_config, dict):
         return None
     return bool(printer_config.get("active_high", None))

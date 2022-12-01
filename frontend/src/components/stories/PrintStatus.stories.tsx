@@ -14,7 +14,7 @@ export default {
     state: {
       control: {
         type: "select",
-        options: ["IDLE", "STARTING_PRINT", "PRINTING"],
+        options: ["OFF", "IDLE", "STARTING_PRINT", "PRINTING"],
       },
     },
     progress: { control: { type: "number", min: 0, max: 100 } },
@@ -60,6 +60,14 @@ Paused.args = {
   print_time_secs: 4800,
   time_left_secs: 3840,
 };
+
+export const Off = Template.bind({});
+Idle.args = {
+  state: "OFF",
+  selectedFile: "lattice.ctb",
+  progress: 0.0,
+};
+
 
 export const Idle = Template.bind({});
 Idle.args = {

@@ -42,7 +42,7 @@ const styles = () =>
     },
   });
 
-type PrinterState = "ON" | "OFF" | "IDLE" | "STARTING_PRINT" | "PRINTING" | "PAUSED";
+type PrinterState = "OFF" | "IDLE" | "STARTING_PRINT" | "PRINTING" | "PAUSED";
 
 function toPrinterState(state: string): PrinterState {
   if (
@@ -196,6 +196,42 @@ class PrintStatus extends React.Component<
       state,
       timeLeftSecs,
     } = nullthrows(this.state.data);
+
+    if (state === "OFF") {
+      return (
+        <Box>
+          <Typography variant="h5" gutterBottom>
+            <Grid
+              container
+              direction="row"
+              justify="center"
+              alignItems="center"
+              spacing={1}
+            >
+              <Grid item>Powered OFF</Grid>
+            </Grid>
+          </Typography>
+          <Grid
+            container
+            alignItems="flex-start"
+            justify="flex-end"
+            direction="row"
+          >
+            <Button
+              variant="outlined"
+              color="primary"
+              size="small"
+              startIcon={<FolderIcon />}
+              component={Link}
+              to="/files"
+            >
+              Files
+            </Button>
+          </Grid>
+        </Box>
+      );
+    }
+
 
     if (state === "IDLE") {
       return (

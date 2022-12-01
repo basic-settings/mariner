@@ -53,18 +53,25 @@ def print_status() -> str:
         # until we have a successful response. see issue #180
 
         # TODO: FixMe -> get status, if status -> OFF don't continue
-        selected_file = retry(
-            printer.get_selected_file,
-            UnexpectedPrinterResponse,
-            num_retries=3,
-        )
         print_status = retry(
             printer.get_print_status,
             UnexpectedPrinterResponse,
             num_retries=3,
         )
 
-        if print_status.state == PrinterState.IDLE:
+        if print_status.state != PrinterState.OFF:
+            selected_file = retry(
+                printer.get_selected_file,
+                UnexpectedPrinterResponse,
+                num_retries=3,
+            )
+
+        if print_status.state == PrinterState.OFF:
+            progress = 0.0
+            print_details = {}
+            selected_file = ""
+
+        elif print_status.state == PrinterState.IDLE:
             progress = 0.0
             print_details = {}
         else:

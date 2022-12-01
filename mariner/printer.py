@@ -1,5 +1,7 @@
 import os
 import re
+# TODO: FixMe -> add gpiozero and pigpiod
+# to requirements
 from gpiozero import OutputDevice
 from gpiozero.pins.pigpio import PiGPIOFactory
 from dataclasses import dataclass
@@ -33,15 +35,8 @@ class PrintStatus:
 FACTORY = None
 DEVICE = None
 
-
 GPIO = config.get_relay_pin()
 if GPIO:
-    # One could argue the gpio libs can be loaded now on-demand
-    # as the GPIO is configured, instead of always loading them.
-    # At the same time installations without relays would use
-    # more space for gpiozero and pigpio libraries.
-    # Extending with MQTT support will also bring in `paho`,
-    # which means more memory space and disk space use
     init_val = config.get_relay_initial_value()
     active_high = config.get_relay_active_high()
     FACTORY = PiGPIOFactory(host='localhost')
@@ -73,7 +68,7 @@ class ChiTuPrinter:
         # TODO: FixMe, this is actually serial.serial exception
         except:
             # do nothing here for the moment, device is not powered
-            # on, it makes no sense to raise further exceptions but
+            # on, it makes no sense to raise further Exceptions but
             # return a valid status instead, i.e. PrinterState.OFF
             pass
 
@@ -94,6 +89,8 @@ class ChiTuPrinter:
         return False
 
     def get_firmware_version(self) -> str:
+        if self.device.value == 0:
+            return PrinterState.OFF
         data = self._send_and_read(b"M4002")
         return self._extract_response_with_regex("^ok ([a-zA-Z0-9_.]+)\n$", data).group(
             1
@@ -103,24 +100,27 @@ class ChiTuPrinter:
         return self._send_and_read(b"M4000")
 
     def get_print_status(self) -> PrintStatus:
-        # TODO: FixMe: This should return OFF else continue
-        # instead of just continuing
-        data = self._send_and_read(b"M4000")
-        match = self._extract_response_with_regex("D:([0-9]+)/([0-9]+)/([0-9]+)", data)
-
-        current_byte = int(match.group(1))
-        total_bytes = int(match.group(2))
-        is_paused = match.group(3) == "1"
-
-        if total_bytes == 0:
-            return PrintStatus(state=PrinterState.IDLE)
-
-        if current_byte == 0:
-            state = PrinterState.STARTING_PRINT
-        elif is_paused:
-            state = PrinterState.PAUSED
+        if self.device.value == 0:
+            state = PrinterState.OFF
+            current_byte = 0
+            total_bytes = 0
         else:
-            state = PrinterState.PRINTING
+            data = self._send_and_read(b"M4000")
+            match = self._extract_response_with_regex("D:([0-9]+)/([0-9]+)/([0-9]+)", data)
+            print('get_print_status info:', match)
+            current_byte = int(match.group(1))
+            total_bytes = int(match.group(2))
+            is_paused = match.group(3) == "1"
+
+            if total_bytes == 0:
+                return PrintStatus(state=PrinterState.IDLE)
+
+            if current_byte == 0:
+                state = PrinterState.STARTING_PRINT
+            elif is_paused:
+                state = PrinterState.PAUSED
+            else:
+                state = PrinterState.PRINTING
 
         return PrintStatus(
             state=state,
@@ -198,9 +198,7 @@ class ChiTuPrinter:
     def reboot(self, delay_in_ms: int = 0) -> None:
         self._send((f"M6040 I{delay_in_ms}").encode())
 
-    def toggle_power(self) -> Optional[int]:
-        if not self.device:
-            return None
+    def toggle_power(self) -> None:
         self.device.toggle()
         return self.device.value
 
